@@ -9,17 +9,18 @@
 source /home/cosuji/anaconda3/etc/profile.d/conda.sh
 conda activate agent
 
-
-model_path = "/home/support/llm/Llama-3.3-70B-Instruct"
-model_id = "/home/support/llm/Llama-3.1-70B-Instruct"
-dataset = "/home/cosuji/spinning-storage/cosuji/NLG_Exp/news_headline/PENS/personalization/pers_preprocessed.csv"
-write_path = "/home/cosuji/spinning-storage/cosuji/NLG_Exp/news_headline/results"
+task="generation"
+model_path="/home/support/llm/DeepSeek-R1-Distill-Llama-70B"
+model_name="dpsk"
+dataset="/home/cosuji/spinning-storage/cosuji/NLG_Exp/clean_news_headline/PENS/personalization/pers_preprocessed.csv"
+write_path="/home/cosuji/spinning-storage/cosuji/NLG_Exp/clean_news_headline/results/${model_name}"
 
 
 echo "Headline Generation Started!!!"
 
-python3 ../prompt.py --model_path "$model_path" \
-			--model_id "$model_id" \
+python3 main.py --task "$task"\
+			--model_path "$model_path" \
+			--model_name "$model_name" \
                     	--data_path "$dataset" \
                     	--write_path "$write_path"
 

@@ -7,9 +7,9 @@ from dotenv import load_dotenv, find_dotenv
 _ = load_dotenv(find_dotenv())  # Read local .env file
 hf_token = os.getenv("HF_TOKEN")
 
-class LlamaModel(torch.nn.Module):
-    def __init__(self, model_id, hf_auth, max_length=512):
-        super(LlamaModel, self).__init__()
+class Model(torch.nn.Module):
+    def __init__(self, model_id, hf_auth=hf_token, max_length=512):
+        super(Model, self).__init__()
         self.max_length = max_length
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = AutoTokenizer.from_pretrained(model_id, token=hf_auth)

@@ -29,10 +29,10 @@ class HeadlineDataLoader:
 
             context_body = ', '.join(selected_context)
             prompt = self.prompt_template.format(
-                category=row['Category'],
-                topic=row['Topic'],
-                entity_str=entity_str,
-                context_body=context_body,
+                #category=row['Category'],
+                #topic=row['Topic'],
+                #entity_str=entity_str,
+                #context_body=context_body,
                 newsbody=row['News body']
             )
             return prompt
