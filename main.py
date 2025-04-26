@@ -2,7 +2,6 @@ import os
 import json
 import argparse
 from eval import evaluate_headline_performance
-# from hf_model import Model, Inferencer
 from ollama_model import OllamaModel
 from load_dataset import HeadlineDataLoader
 from dotenv import load_dotenv, find_dotenv
@@ -67,6 +66,8 @@ if __name__ == "__main__":
         pred = []
         n = 5
         if "llm" in model_id:
+            from hf_model import Model, Inferencer
+            
             #Load the Hugging-face Model
             model = Model(model_id=model_id, hf_auth=hf_token, max_length=256)
         
