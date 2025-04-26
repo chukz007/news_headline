@@ -8,9 +8,9 @@ File Structure
 
 ```
 news_headline/
-├── archive/                  # Contains the downloaded datasets
-├── results/                  # Stores generated results and outputs
-├── eval.py                   # Evaluation script for model performance
+├── archive/                   # Contains the downloaded datasets
+├── results/                   # Stores generated results and outputs
+├── eval.py                    # Evaluation script for model performance
 ├── hf_model.py                # Hugging Face model implementation
 ├── kaggle_pens.ipynb          # Jupyter Notebook exploration of dataset
 ├── load_dataset.py            # Script to load and preprocess datasets
