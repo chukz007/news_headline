@@ -66,7 +66,7 @@ if __name__ == "__main__":
         
         pred = []
         n = 5
-        if "Instruct" in model_id:
+        if "llm" in model_id:
             #Load the Hugging-face Model
             model = Model(model_id=model_id, hf_auth=hf_token, max_length=256)
         
