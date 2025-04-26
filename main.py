@@ -8,7 +8,7 @@ from load_dataset import HeadlineDataLoader
 from dotenv import load_dotenv, find_dotenv
 
 
-# _ = load_dotenv(find_dotenv())  # Read local .env file: pip install python-dotenv
+# _ = load_dotenv(find_dotenv())  # Read local .env file
 # hf_token = os.getenv("HF_TOKEN")
 
 
