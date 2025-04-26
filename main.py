@@ -26,7 +26,6 @@ system_prompt = """
 """
 
 
-
 # x ="""You have these information below to help you.
 # Category: {category}
 # Topic: {topic}
