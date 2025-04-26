@@ -1,7 +1,7 @@
+import nltk
 from nltk.tokenize import word_tokenize
 from rouge_score import rouge_scorer
 import sacrebleu
-import nltk
 
 
 

@@ -2,13 +2,14 @@ import os
 import json
 import argparse
 from eval import evaluate_headline_performance
-from model import Model, Inferencer
+# from hf_model import Model, Inferencer
+from ollama_model import OllamaModel
 from load_dataset import HeadlineDataLoader
 from dotenv import load_dotenv, find_dotenv
 
 
-_ = load_dotenv(find_dotenv())  # Read local .env file
-hf_token = os.getenv("HF_TOKEN")
+# _ = load_dotenv(find_dotenv())  # Read local .env file: pip install python-dotenv
+# hf_token = os.getenv("HF_TOKEN")
 
 
 prompt_template = """Role: News Headline Generator
@@ -20,13 +21,19 @@ News Body:
 
 Headline: """
 
-x """You have these information below to help you.
-Category: {category}
-Topic: {topic}
-Entities: {entity_str}
-News Context: {context_body}
+system_prompt = """
 
-Headline: """
+"""
+
+
+
+# x ="""You have these information below to help you.
+# Category: {category}
+# Topic: {topic}
+# Entities: {entity_str}
+# News Context: {context_body}
+
+# Headline: """
 
 
 if __name__ == "__main__":
@@ -44,33 +51,46 @@ if __name__ == "__main__":
     data_path = args.data_path
     write_path = args.write_path
 
-    #task = "generation"
-    #model_path = "/home/support/llm/Llama-3.3-70B-Instruct"
-    #model_id = "/home/support/llm/Llama-3.1-70B-Instruct"
-    #data_path = "/home/cosuji/spinning-storage/cosuji/NLG_Exp/news_headline/PENS/personalization/pers_preprocessed.csv"
-    #write_path = "/home/cosuji/spinning-storage/cosuji/NLG_Exp/news_headline/results"
+    # task="generation"
+    # model_path="llama3.2"
+    # model_name="llama"
+    # write_path=f"results/{model_name}"
+    # data_path="archive/personalization/pers_preprocessed.csv"
+
 
     if task == "generation":
         #Load the dataset
         loader = HeadlineDataLoader(data_path, prompt_template)
-
+        
         #Add the prompt to the dataset
         prompts, news_body, ground_truth = loader.get_prompts()
-
-        #Load the Hugging-face Model
-        model = Model(model_id=model_id, hf_auth=hf_token, max_length=256)
-    
-        # Create the inferencer
-        inferencer = Inferencer(model)
-
+        
         pred = []
         n = 5
-        for prompt in prompts[:n]:
-            #print(prompt)
-            result = inferencer.evaluate(prompt).split(prompt)[-1]
-            pred.append(result)
-            print(result)
-            print('-'*100)
+        if "Instruct" in model_id:
+            #Load the Hugging-face Model
+            model = Model(model_id=model_id, hf_auth=hf_token, max_length=256)
+        
+            # Create the inferencer
+            inferencer = Inferencer(model)
+                    
+            for prompt in prompts[:n]:
+                #print(prompt)
+                result = inferencer.evaluate(prompt).split(prompt)[-1]
+                pred.append(result)
+                print(result)
+                print('-'*100)
+        else:
+            #Load the Ollama Model
+            ollama_model = OllamaModel(model_name="llama3.2", temperature=0)
+            model = ollama_model.model_(system_prompt)
+            
+            for prompt in prompts[:n]:
+                #print(prompt)
+                result = model.invoke({'input': prompt}).content
+                pred.append(result)
+                print(result)
+                print('-'*100)
 
 
         #create a json file with the news_body, prediction and ground_truth as column names
