@@ -1,4 +1,4 @@
-# news_headline
+# News Headline
 
 Generate a news headline using generative models
 
