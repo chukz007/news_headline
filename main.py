@@ -1,7 +1,6 @@
 import os
 import json
 import argparse
-from eval import evaluate_headline_performance
 from ollama_model import OllamaModel
 from load_dataset import HeadlineDataLoader
 from dotenv import load_dotenv, find_dotenv
@@ -40,13 +39,19 @@ Headline:
 """
 
 
-# x ="""You have these information below to help you.
-# Category: {category}
-# Topic: {topic}
-# Entities: {entity_str}
-# News Context: {context_body}
+def save_json(data, path, filename):
+    """
+    Save a list of dictionaries as a JSON file.
 
-# Headline: """
+    Args:
+        data (list): The list of dictionaries to save.
+        path (str): The directory where the file should be saved.
+        filename (str): The name of the JSON file.
+    """
+    os.makedirs(path, exist_ok=True)
+    full_path = os.path.join(path, filename)
+    with open(full_path, "w", encoding="utf8") as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
 
 
 if __name__ == "__main__":
@@ -63,6 +68,9 @@ if __name__ == "__main__":
     model_name = args.model_name
     data_path = args.data_path
     write_path = args.write_path
+    
+    # Ensure write directory exists
+    os.makedirs(write_path, exist_ok=True)
 
     # task="generation"
     # model_path="llama3.2"
@@ -76,7 +84,7 @@ if __name__ == "__main__":
         prompts, news_body, ground_truth = loader.get_prompts()
 
         n = 5  # You can change this to len(prompts) for full processing
-        output = []
+        output, comet_output = [], []
 
         if "llm" in model_id:
             from hf_model import Model, Inferencer
@@ -90,8 +98,7 @@ if __name__ == "__main__":
                     "prediction": result,
                     "ground_truth": ground_truth[i]
                 })
-                print(result)
-                print('-' * 100)
+
         else:
             ollama_model = OllamaModel(model_name=model_id, temperature=0)
             model = ollama_model.model_(system_prompt)
@@ -103,21 +110,45 @@ if __name__ == "__main__":
                     "prediction": result,
                     "ground_truth": ground_truth[i]
                 })
-                print(result)
-                print('-' * 100)
-
-        # Ensure write directory exists
-        os.makedirs(write_path, exist_ok=True)
-
-        # Save the output as a list of dictionaries in JSON format
-        with open(os.path.join(write_path, "result.json"), "w", encoding="utf8") as f:
-            json.dump(output, f, indent=4, ensure_ascii=False)
+                comet_output.append({
+                    "src": news_body[i], #news body
+                    "mt": result, #prediction
+                    "ref": ground_truth[i] #ground truth
+                })
+                # print(result)
+                # print('-' * 100)
+        
+        save_json(output, write_path, "result.json")
+        save_json(comet_output, write_path, "comet_result.json")
 
     elif task == "translation":
         pass
 
     else:  # Evaluation
-        pass
+        from eval import evaluate_headline_performance, evaluate_with_comet
+
+        # Run headline-level metrics
+        print("\nEvaluating headline quality (BLEU, METEOR, ROUGE)...")
+        avg_bleu, avg_meteor, avg_rouge_f1 = evaluate_headline_performance(
+            json_path=os.path.join(write_path, "result.json")
+        )
+
+        print("Running COMET evaluation...")
+        avg_comet, comet_scores = evaluate_with_comet(
+            json_path=os.path.join(write_path, "result.json"),
+            gpus=1
+        )
+
+        metric_result = {
+            "average_bleu": avg_bleu,
+            "average_meteor": avg_meteor,
+            "average_rouge_f1": avg_rouge_f1,
+            # "average_comet": avg_comet,
+            "comet_scores": comet_scores
+        }
+
+        save_json(metric_result, write_path, "metric_result.json")
+        print(f"\nAll metrics saved to {os.path.join(write_path, 'metric_result.json')}")
 
 
 
