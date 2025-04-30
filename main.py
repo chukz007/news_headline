@@ -10,18 +10,33 @@ from dotenv import load_dotenv, find_dotenv
 # _ = load_dotenv(find_dotenv())  # Read local .env file
 # hf_token = os.getenv("HF_TOKEN")
 
+system_prompt = """You are a professional journalist specializing in headline writing. You have a strong understanding of news structure and style, and can produce headlines that are clear, accurate, and compelling.
 
-prompt_template = """Role: News Headline Generator
-Task: Generate a compelling news headline using the given news article.
-Please generate only one short, concise, and accurate news headline that captures the essence of the news and engages the audience. Do not generate any other thing asides the task given.
+Your task is to generate a short headline (under 12 words) that:
+1. Clearly reflects the article’s core message or main event
+2. Preserves important context, including key people, actions, and consequences
+3. Matches the tone and style of professional journalism across various categories (e.g., politics, business, sports, lifestyle)
+4. May include brief quotes if directly relevant
+5. Avoids generic phrasing, vagueness, or repetition
 
-News Body: 
+Output:
+Only the final headline. Do not include any explanation or additional text.
+"""
+
+prompt_template = """You are given a news article. Your task is to generate a concise, informative, and compelling headline that accurately summarizes the core event or message. The headline should be under 12 words and capture key names, actions, or outcomes.
+
+The article may belong to any category (e.g., politics, business, sports, lifestyle, crime, health). Use the article's content to infer the appropriate tone and focus.
+
+Instructions:
+1. Read the article carefully.
+2. Identify the central event, key people involved, and the outcome.
+3. Write a short headline that reflects the article's main point with clarity and relevance.
+4. Return only the headline — no commentary or extra text.
+
+News Body:
 {newsbody}
 
-Headline: """
-
-system_prompt = """
-
+Headline:
 """
 
 
@@ -57,63 +72,51 @@ if __name__ == "__main__":
 
 
     if task == "generation":
-        #Load the dataset
         loader = HeadlineDataLoader(data_path, prompt_template)
-        
-        #Add the prompt to the dataset
         prompts, news_body, ground_truth = loader.get_prompts()
-        
-        pred = []
-        n = 5
+
+        n = 5  # You can change this to len(prompts) for full processing
+        output = []
+
         if "llm" in model_id:
             from hf_model import Model, Inferencer
-            
-            #Load the Hugging-face Model
             model = Model(model_id=model_id, hf_auth=hf_token, max_length=256)
-        
-            # Create the inferencer
             inferencer = Inferencer(model)
-                    
-            for prompt in prompts[:n]:
-                #print(prompt)
-                result = inferencer.evaluate(prompt).split(prompt)[-1]
-                pred.append(result)
+
+            for i in range(n):
+                result = inferencer.evaluate(prompts[i]).split(prompts[i])[-1].strip()
+                output.append({
+                    "news_body": news_body[i],
+                    "prediction": result,
+                    "ground_truth": ground_truth[i]
+                })
                 print(result)
-                print('-'*100)
+                print('-' * 100)
         else:
-            #Load the Ollama Model
-            ollama_model = OllamaModel(model_name="llama3.2", temperature=0)
+            ollama_model = OllamaModel(model_name=model_id, temperature=0)
             model = ollama_model.model_(system_prompt)
-            
-            for prompt in prompts[:n]:
-                #print(prompt)
-                result = model.invoke({'input': prompt}).content
-                pred.append(result)
+
+            for i in range(n):
+                result = model.invoke({'input': prompts[i]}).content.strip()
+                output.append({
+                    "news_body": news_body[i],
+                    "prediction": result,
+                    "ground_truth": ground_truth[i]
+                })
                 print(result)
-                print('-'*100)
+                print('-' * 100)
 
-
-        #create a json file with the news_body, prediction and ground_truth as column names
-        output = {"news_body": news_body[:n],
-                  "prediction": pred,
-                  "ground_truth": ground_truth[:n]}
-
-        # Ensure the write directory exists
+        # Ensure write directory exists
         os.makedirs(write_path, exist_ok=True)
 
-        #Write your result to a json file - result.json
+        # Save the output as a list of dictionaries in JSON format
         with open(os.path.join(write_path, "result.json"), "w", encoding="utf8") as f:
             json.dump(output, f, indent=4, ensure_ascii=False)
 
-
-        for filename, contents in output.items():
-            with open(os.path.join(write_path, f"{filename}.txt"), "w", encoding="utf8") as f:
-                f.write('\n\n'.join(str(item) for item in contents))  # separate each item with line breaks
-    
     elif task == "translation":
         pass
 
-    else: #Evaluation
+    else:  # Evaluation
         pass
 
 

@@ -1,11 +1,11 @@
 #!/bin/bash
 
 ## Load conda into the shell session & Activate your environment
-## source /Users/chinonsoosuji/opt/anaconda3/etc/profile.d/conda.sh
-## conda activate lang2
+source /Users/chinonsoosuji/opt/anaconda3/etc/profile.d/conda.sh
+conda activate lang2
 
-source /c/Users/CYNTHIA/anaconda3/etc/profile.d/conda.sh
-conda activate somto
+## source /c/Users/CYNTHIA/anaconda3/etc/profile.d/conda.sh
+## conda activate somto
 
 task="generation"
 model_path="llama3.2"
