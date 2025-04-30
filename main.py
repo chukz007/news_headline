@@ -17,7 +17,7 @@ Your task is to generate a short headline (under 12 words) that:
 3. Matches the tone and style of professional journalism across various categories (e.g., politics, business, sports, lifestyle)
 4. May include brief quotes if directly relevant
 5. Avoids generic phrasing, vagueness, or repetition
-
+ 
 Output:
 Only the final headline. Do not include any explanation or additional text.
 """
@@ -110,16 +110,10 @@ if __name__ == "__main__":
                     "prediction": result,
                     "ground_truth": ground_truth[i]
                 })
-                comet_output.append({
-                    "src": news_body[i], #news body
-                    "mt": result, #prediction
-                    "ref": ground_truth[i] #ground truth
-                })
                 # print(result)
                 # print('-' * 100)
         
         save_json(output, write_path, "result.json")
-        save_json(comet_output, write_path, "comet_result.json")
 
     elif task == "translation":
         pass
