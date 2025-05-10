@@ -119,30 +119,38 @@ if __name__ == "__main__":
         pass
 
     else:  # Evaluation
-        from eval import evaluate_headline_performance, evaluate_with_comet
+        from eval import evaluate_headline_performance, evaluate_with_comet, evaluate_semantic_metrics
 
-        # Run headline-level metrics
-        print("\nEvaluating headline quality (BLEU, METEOR, ROUGE)...")
-        avg_bleu, avg_meteor, avg_rouge_f1 = evaluate_headline_performance(
-            json_path=os.path.join(write_path, "result.json")
-        )
+        # # Run headline-level metrics
+        # print("\nEvaluating headline quality (BLEU, METEOR, ROUGE)...")
+        # avg_bleu, avg_meteor, avg_rouge_f1 = evaluate_headline_performance(
+        #     json_path=os.path.join(write_path, "result.json")
+        # )
 
-        print("Running COMET evaluation...")
-        avg_comet, comet_scores = evaluate_with_comet(
-            json_path=os.path.join(write_path, "result.json"),
-            gpus=1
-        )
+        # print("Running COMET evaluation...")
+        # avg_comet, comet_scores = evaluate_with_comet(
+        #     json_path=os.path.join(write_path, "result.json"),
+        #     gpus=1
+        # )
 
-        metric_result = {
-            "average_bleu": avg_bleu,
-            "average_meteor": avg_meteor,
-            "average_rouge_f1": avg_rouge_f1,
-            # "average_comet": avg_comet,
-            "comet_scores": comet_scores
-        }
+        # metric_result = {
+        #     "average_bleu": avg_bleu,
+        #     "average_meteor": avg_meteor,
+        #     "average_rouge_f1": avg_rouge_f1,
+        #     # "average_comet": avg_comet,
+        #     "comet_scores": comet_scores
+        # }
 
-        save_json(metric_result, write_path, "metric_result.json")
-        print(f"\nAll metrics saved to {os.path.join(write_path, 'metric_result.json')}")
+        # save_json(metric_result, write_path, "metric_result.json")
+        # print(f"\nAll metrics saved to {os.path.join(write_path, 'metric_result.json')}")
+        
+        # Now compute BLEURT + BERTScore only
+        print("Evaluating semantic similarity (BERTScore, BLEURT)...")
+        semantic_metrics = evaluate_semantic_metrics(json_path=os.path.join(write_path, "result.json"))
+
+        # Save separately
+        save_json(semantic_metrics, write_path, "semantic_metrics.json")
+        print(f"\nBLEURT + BERTScore metrics saved to {os.path.join(write_path, 'semantic_metrics.json')}")
 
 
 

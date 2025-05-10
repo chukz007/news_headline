@@ -25,6 +25,7 @@ news_headline/
 ```
 
 Install Requirements
+Create `python=3.10.6` environment for `unbabel-comet` package to work
 `pip install -r requirements.txt`
 
 Download the [Ollama](https://ollama.com/) model and setup the model like this  in your command terminal.
