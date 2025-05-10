@@ -4,6 +4,8 @@ from rouge_score import rouge_scorer
 import sacrebleu
 import json
 from comet import download_model, load_from_checkpoint
+from bert_score import score as bertscore
+from bleurt import score as bleurtscore
 
 
 def evaluate_headline_performance(json_path):
@@ -93,3 +95,30 @@ def evaluate_with_comet(json_path, model_name="Unbabel/wmt22-comet-da", batch_si
     model_output = model.predict(comet_ready_data, batch_size=batch_size, gpus=gpus)
 
     return model_output[0], model_output[1] # return only scores
+
+def evaluate_semantic_metrics(json_path):
+    """
+    Evaluate BERTScore and BLEURT from a JSON file.
+    """
+
+    with open(json_path, 'r', encoding='utf8') as f:
+        data = json.load(f)
+
+    preds = [item["prediction"] for item in data]
+    refs = [item["ground_truth"] for item in data]
+
+    # BERTScore
+    _, _, bert_f1 = bertscore(preds, refs, lang="en", verbose=False)
+    avg_bertscore = bert_f1.mean().item()
+
+    # BLEURT
+    bleurt_scorer = bleurtscore.Scorer()
+    bleurt_scores = bleurt_scorer.score(references=refs, candidates=preds)
+    avg_bleurt = sum(bleurt_scores) / len(bleurt_scores)
+
+    return {
+        "average_bertscore_f1": avg_bertscore,
+        "average_bleurt": avg_bleurt,
+        "bertscore_f1_scores": bert_f1.tolist(),
+        "bleurt_scores": bleurt_scores
+    }
