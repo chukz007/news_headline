@@ -1,11 +1,16 @@
 import nltk
+#nltk.download('all')
+from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
+smoother = SmoothingFunction()
 from nltk.tokenize import word_tokenize
 from rouge_score import rouge_scorer
 import sacrebleu
 import json
 from comet import download_model, load_from_checkpoint
+import torch
+from bleurt_pytorch import BleurtConfig, BleurtForSequenceClassification, BleurtTokenizer
 from bert_score import score as bertscore
-from bleurt import score as bleurtscore
+import json
 
 
 def evaluate_headline_performance(json_path):
@@ -48,8 +53,13 @@ def evaluate_headline_performance(json_path):
             rouge['rougeL'].fmeasure
         ]) / 3
 
-        # BLEU
-        bleu = sacrebleu.raw_corpus_bleu([prediction], [[ground_truth]], .01).score
+        # BLEU (scaled to 0–1)
+        #bleu = sacrebleu.raw_corpus_bleu([prediction], [[ground_truth]], .01).score / 100
+
+        # BLEU (safely, with smoothing)
+        bleu = sentence_bleu([gt_tokens], pred_tokens, smoothing_function=smoother.method1)
+        bleu_scores.append(bleu)  # scale to 0–1 for consistency
+
 
         # Collect scores
         bleu_scores.append(bleu)
@@ -96,9 +106,12 @@ def evaluate_with_comet(json_path, model_name="Unbabel/wmt22-comet-da", batch_si
 
     return model_output[0], model_output[1] # return only scores
 
+
+
 def evaluate_semantic_metrics(json_path):
     """
-    Evaluate BERTScore and BLEURT from a JSON file.
+    Evaluate BERTScore and BLEURT (via bleurt-pytorch) from a JSON file,
+    with truncation and OOM protection.
     """
 
     with open(json_path, 'r', encoding='utf8') as f:
@@ -111,14 +124,19 @@ def evaluate_semantic_metrics(json_path):
     _, _, bert_f1 = bertscore(preds, refs, lang="en", verbose=False)
     avg_bertscore = bert_f1.mean().item()
 
-    # BLEURT
-    bleurt_scorer = bleurtscore.Scorer()
-    bleurt_scores = bleurt_scorer.score(references=refs, candidates=preds)
+    # BLEURT (safe, line-by-line)
+    config = BleurtConfig.from_pretrained('lucadiliello/BLEURT-20-D12')
+    model = BleurtForSequenceClassification.from_pretrained('lucadiliello/BLEURT-20-D12')
+    tokenizer = BleurtTokenizer.from_pretrained('lucadiliello/BLEURT-20-D12')
+    model.eval()
+
+    bleurt_scores = []
+    with torch.no_grad():
+        for ref, pred in zip(refs, preds):
+            inputs = tokenizer(ref, pred, padding='longest', truncation=True, max_length=512, return_tensors='pt')
+            output = model(**inputs).logits.flatten().item()
+            bleurt_scores.append(output)
+
     avg_bleurt = sum(bleurt_scores) / len(bleurt_scores)
 
-    return {
-        "average_bertscore_f1": avg_bertscore,
-        "average_bleurt": avg_bleurt,
-        "bertscore_f1_scores": bert_f1.tolist(),
-        "bleurt_scores": bleurt_scores
-    }
+    return avg_bertscore, avg_bleurt

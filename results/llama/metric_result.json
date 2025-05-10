@@ -1,6 +1,8 @@
 {
-    "average_bleu": 1.6070152750437698,
-    "average_meteor": 0.2571665904447164,
-    "average_rouge_f1": 0.23708893636882644,
-    "comet_scores": 0.6507380938631239
+    "average_bleu": 0.038,
+    "average_meteor": 0.257,
+    "average_rouge_f1": 0.237,
+    "comet_scores": 0.651,
+    "average_bertscore_f1": 0.871,
+    "average_bleurt": 0.338
 }

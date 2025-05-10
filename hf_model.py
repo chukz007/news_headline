@@ -76,3 +76,12 @@ class Inferencer:
         output = self.model.generate_text(text)
         result = output.split(text)[-1].strip().replace("\n", "  ")
         return result
+
+    def evaluate_batch(self, texts):
+        self.model.eval()
+        results = []
+        for text in texts:
+            output = self.model.generate_text(text)
+            result = output.split(text)[-1].strip().replace("\n", " ")
+            results.append(result)
+        return results
