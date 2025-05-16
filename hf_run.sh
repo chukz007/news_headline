@@ -14,8 +14,8 @@ task="translation"
 #model_path="unsloth/c4ai-command-a-03-2025-bnb-4bit"
 model_path="CohereForAI/c4ai-command-r-plus-4bit"
 model_name="llama"
-dataset="/home/cosuji/spinning-storage/cosuji/NLG_Exp/clean_news_headline/PENS/personalization/pers_preprocessed.csv"
-write_path="/home/cosuji/spinning-storage/cosuji/NLG_Exp/clean_news_headline/results/${model_name}"
+dataset="PENS/personalization/pers_preprocessed.csv"
+write_path="results/${model_name}"
 
 
 echo "Headline Generation Started!!!"

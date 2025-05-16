@@ -140,3 +140,25 @@ def evaluate_semantic_metrics(json_path):
     avg_bleurt = sum(bleurt_scores) / len(bleurt_scores)
 
     return avg_bertscore, avg_bleurt
+
+
+def evaluate_with_comet_referenceless(data, model_name="Unbabel/wmt22-cometkiwi-da", batch_size=8, gpus=1):
+    """
+    Evaluates a list of translation pairs (src, mt) using referenceless COMET.
+
+    Args:
+        data (list): List of dicts with keys 'src' and 'mt'
+        model_name (str): COMET referenceless model name
+        batch_size (int): Batch size for inference
+        gpus (int): Use GPU if > 0, else CPU
+
+    Returns:
+        Tuple[float, List[float]]: (average_score, list_of_scores)
+    """
+    from comet import download_model, load_from_checkpoint
+
+    model_path = download_model(model_name)
+    model = load_from_checkpoint(model_path)
+
+    model_output = model.predict(data, batch_size=batch_size, gpus=gpus)
+    return model_output[0], model_output[1]

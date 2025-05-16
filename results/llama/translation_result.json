@@ -1,0 +1,67 @@
+[
+    {
+        "ground_truth": "High-stakes legal fight looms over Trump pollution rule",
+        "prediction_en": "Trump Administration's New Power Plant Rule Sparks Precedent-Setting Legal Battle",
+        "prediction_fr": "Traduction : La nouvelle réglementation sur les centrales électriques de l'administration Trump déclenche une bataille juridique sans précédent",
+        "prediction_sp": "Traducción: La nueva norma de la administración Trump sobre centrales eléctricas desata una batalla legal que sienta precedente",
+        "prediction_po": "Tradução: A Nova Regra das Centrais Elétricas da Administração de Trump Desencadeia uma Batalha Jurídica que Cria um Precedente",
+        "prediction_it": "Traduzione: La nuova regola sulle centrali elettriche dell'amministrazione Trump scatena una battaglia legale che fa giurisprudenza",
+        "prediction_ge": "Überschrift: Trumps neue Regelung für Kraftwerke löst Präzedenzfall vor Gericht aus",
+        "prediction_ru": "Администрация Трампа: новое правило для электростанций вызывает прецедентную юридическую битву",
+        "prediction_ch": "翻译：特朗普政府的新发电厂规定引发开创先例的法律之战。",
+        "prediction_hi": "ट्रम्प प्रशासन के नए बिजली संयंत्र नियमों में अभूतपूर्व वैधानिक लड़ाई छिड़ी हुई है।",
+        "prediction_ar": "ترامب يطلق معركة قانونية غير مسبوقة بقاعدة جديدة لمحطات الطاقة الكهربائية التابعة لإدارته"
+    },
+    {
+        "ground_truth": "The One Thing That Immediately Makes Your House Look Dated",
+        "prediction_en": "\"Updating Old Homes: Countertops Key to Reviving Retro Kitchens\"",
+        "prediction_fr": "Traduction : « Rénover les anciennes demeures : le plan de travail, clé pour redonner vie aux cuisines rétro »",
+        "prediction_sp": "Traducción: Actualización de casas antiguas: las encimeras, clave para revivir cocinas retro\".",
+        "prediction_po": "Tradução: \"Atualizando Casas Antigas: Bancadas São a Chave para Renovar Cozinhas Retrô\".",
+        "prediction_it": "Traduzione: \"Rinnovare le vecchie case: i banconi sono la chiave per riportare alla vita cucine rétro\".",
+        "prediction_ge": "Überschrift: „Alte Häuser modernisieren: Arbeitsplatten sind der Schlüssel zur Wiederbelebung von Vintage-Küchen“",
+        "prediction_ru": "Translation: «Обновление старых домов: столешницы – ключ к возрождению ретро-кухонь»",
+        "prediction_ch": "翻译：翻新老房子：台面是重振复古厨房的关键。",
+        "prediction_hi": "शीर्षक: पुराने घरों को अपडेट करना: रेट्रो-किचन में जान फूंकने की चाबी, नए काउंटर-टॉप्स हैं!",
+        "prediction_ar": "الترجمة الدقيقة للعنوان هي:"
+    },
+    {
+        "ground_truth": "Justin Verlander got 'chewed out' by MLB before All-Star Game",
+        "prediction_en": "Verlander Reprimanded for Accusing MLB of Juicing Balls, League Stands Firm",
+        "prediction_fr": "Traduction : Les accusations de triche contre la ligue de baseball réfutées par l'instance dirigeante qui soutient fermement ses joueurs",
+        "prediction_sp": "Traducción: El lanzador Justin Verlander es reprendido por acusar a la Liga de Béisbol (MLB) de alterar las pelotas; La liga se mantiene firme.",
+        "prediction_po": "Tradução: Verlander Repreendido por Acusar a Liga de Alteração nas Bolas, Mantém-se Firme na Posição da Major League Baseball (MLB)",
+        "prediction_it": "Traduzione: Verlander Rimproverato per Aver Accusato la Major League Baseball di Alterare le Palle da Gioco; La Lega Mantiene una Posizione Decisa.",
+        "prediction_ge": "Übersetzung: Verlanders Vorwürfe an die MLB wegen manipulierter Bälle werden zurückgewiesen – Liga bleibt hart",
+        "prediction_ru": "Перевод заголовка: Верландера осудили за обвинения МЛБ в использовании подкрученных мячей, лига стоит на своем",
+        "prediction_ch": "翻译：维兰德因指控大联盟使用“兴奋剂”球而受责难，联盟立场坚定。",
+        "prediction_hi": "शीर्षक: वेरलैंडर को एमएलबी पर गेंदों में रसायन डालने का आरोप लगाने पर फटकार; लीग अपने रुख़ पर अडिग रही।",
+        "prediction_ar": "ترجمة العنوان: فيرلاندر يتعرض للتوبيخ بسبب اتهامه دوري البيسبول الرئيسي بتعديل الكرات، والدوري يتمسك بموقفه."
+    },
+    {
+        "ground_truth": "OJ Simpson on Twitter: 'I got a little gettin' even to do'",
+        "prediction_en": "O.J. Simpson Launches Official Twitter Account, Promises 'Gettin' Even'",
+        "prediction_fr": "Traduction : \"O. J. Simpson lance son compte officiel sur Twitter et promet de « se venger »\"",
+        "prediction_sp": "Traducción: O. J. Simpson lanza su cuenta oficial de Twitter y promete \"venganza\" (\"gettin' even\").",
+        "prediction_po": "Tradução: \"O. J. Simpson Lança Conta Oficial no Twitter e Promete Vingança\".",
+        "prediction_it": "Traduzione: L'account ufficiale di O. J. Simpson su Twitter promette \"La vendetta è servita\" (\"Getting even\").",
+        "prediction_ge": "Überschrift: O. J. Simpsons offizieller Start auf Twitter verspricht „Rache“ (Getting’ even)",
+        "prediction_ru": "О.Джей Симпсон запускает официальный аккаунт в Твиттере и обещает \"отомстить\" (\"Gettin’ Even\").",
+        "prediction_ch": "标题：O·J·辛普森开通官方推特账号，承诺“报仇雪恨”",
+        "prediction_hi": "शीर्षक: ओजे सिम्पसन ने आधिकारिक ट्विटर अकाउंट लॉन्च किया, \"हिसाब चुकता\" करने का वादा किया।",
+        "prediction_ar": "أطلق أو جيه سيمبسون حسابه الرسمي على تويتر، ووعد بـ \"الانتقام\""
+    },
+    {
+        "ground_truth": "Gauff, just 15, shocks 5-time champ Venus, 39, at Wimbledon",
+        "prediction_en": "Gauff Stuns Venus at Wimbledon, Becomes Youngest to Qualify for All England Club",
+        "prediction_fr": "Gauff stupéfie Vénus à Wimbledon et devient la plus jeune qualifiée pour le club de l'Angleterre entière.",
+        "prediction_sp": "Traducción: La joven tenista Coco Gauff sorprende a la veterana Venus Williams en Wimbledon y se convierte en la más joven en clasificar para el club de Inglaterra.",
+        "prediction_po": "Tradução: Gauff surpreende Vênus em Wimbledon e torna-se a mais jovem qualificada para o Clube de Todos os Ingleses",
+        "prediction_it": "Gauff stupisce tutti a Wimbledon e diventa la più giovane qualificata per l'All-England club battendo Venere Williams",
+        "prediction_ge": "Überschrift: Gauff schockt bei Wimbledon mit Sieg über Williams und wird jüngste Qualifikantin für den englischen Tennisclub",
+        "prediction_ru": "Гауфф шокировала Венеру на Уимблдоне и стала самой молодой квалификанткой Всеанглийского клуба",
+        "prediction_ch": "翻译：高芙在温布尔登赛场惊艳全场，成为进入英格兰俱乐部最年轻的选手。",
+        "prediction_hi": "गॉफ़ ने विंबलडन में वीनस को चौंकाया, ऑल इंग्लैंड क्लब के लिए योग्यता प्राप्त करने वाली सबसे कम उम्र की खिलाड़ी बनीं",
+        "prediction_ar": "Gauff تُفاجئ فينوس ويليامز وتصبح أصغر لاعبة تتأهل لنادي عموم إنجلترا للتنس ببطولة ويمبلدون."
+    }
+]
