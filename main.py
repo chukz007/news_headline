@@ -89,11 +89,11 @@ if __name__ == "__main__":
 
     elif task == "translation":
         input_path = os.path.join(write_path, "result.json")
-        n = 1000  # You can change this to len(prompts) for full processing
+        sample_size = 1000  # You can change this to len(prompts) for full processing
         if "/" in model_id:
-            translated = translate_with_hf(input_path, model_id=model_id, hf_token=hf_token, sample_size=n)
+            translated = translate_with_hf(input_path, model_id, hf_token, sample_size)
         else:
-            translated = translate_with_ollama(input_path, model_id=model_id, sample_size=n)
+            translated = translate_with_ollama(input_path, model_id, sample_size)
 
         print("Saving translated results...")
         save_json(translated, write_path, f"{task}_result.json")

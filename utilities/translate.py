@@ -1,6 +1,6 @@
 import json
 
-def translate_with_ollama(input_path, model_id, sample_size=5):
+def translate_with_ollama(input_path, model_id, sample_size):
     """
     Translate the predictions in the input JSON file using the specified model.
     Args:
@@ -48,7 +48,7 @@ def translate_with_ollama(input_path, model_id, sample_size=5):
     return translated
 
 
-def translate_with_hf(input_path, model_id, hf_token, sample_size=5):
+def translate_with_hf(input_path, model_id, hf_token, sample_size):
     """
     Translate the predictions in the input JSON file using the specified Hugging Face model.
     Args:
