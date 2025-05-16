@@ -10,16 +10,18 @@ File Structure
 news_headline/
 ├── archive/                   # Contains the downloaded datasets
 ├── results/                   # Stores generated results and outputs
-├── eval.py                    # Evaluation script for model performance
-├── hf_model.py                # Hugging Face model implementation
+├── utilities                  # Project documentation
+    ├── __init__.py                # Marks the utilities directory as a Python package
+    ├── eval.py                    # Evaluation script for model performance
+    ├── hf_model.py                # Hugging Face model implementation
+    ├── load_dataset.py            # Script to load and preprocess datasets
+    ├── ollama_model.py            # Ollama model integration
+    ├── prompts.py                 # Prompt templates for headline generation and translation
+    ├── translate.py               # Translation interface for multilingual headline output
 ├── kaggle_pens.ipynb          # Jupyter Notebook exploration of dataset
-├── load_dataset.py            # Script to load and preprocess datasets
 ├── main.py                    # Main script to run the project
-├── model.py                   # Model utility functions
-├── ollama_model.py            # Ollama model integration
 ├── README.md                  # Project documentation
 ├── requirements.txt           # List of dependencies
-├── run.job                    # Job runner file
 ├── run.sh                     # Shell script to run the project
 ├── test.py                    # Testing and debugging script
 ```
