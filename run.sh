@@ -6,21 +6,20 @@
 source /home/chinonso/anaconda3/etc/profile.d/conda.sh
 conda activate somto
 
-task="translation evaluation"
+task="translation"
 model_path="command-r-plus"  ##"llama3.2"
 model_name="llama"
 dataset="archive/personalization/pers_preprocessed.csv"
 write_path="results/${model_name}"
 
-
 echo "Started!!!"
 
-python main.py --task "$task"\
-			--model_path "$model_path" \
-			--model_name "$model_name" \
-                    	--data_path "$dataset" \
-                    	--write_path "$write_path"
+python main.py --task "$task" \
+    --model_path "$model_path" \
+    --model_name "$model_name" \
+    --data_path "$dataset" \
+    --write_path "$write_path"
 
 echo "Finished!!!"
 
-# To run this on your terminal, run this command first: `chmod +x run.sh` next run this `./run.sh`
+# To run this: chmod +x run.sh && ./run.sh
