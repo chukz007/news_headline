@@ -4,7 +4,7 @@
 ##source /Users/chinonsoosuji/opt/anaconda3/etc/profile.d/conda.sh
 ##source /c/Users/CYNTHIA/anaconda3/etc/profile.d/conda.sh
 source /home/chinonso/anaconda3/etc/profile.d/conda.sh
-conda activate somto
+conda activate lang2
 
 task="translation"
 model_path="command-r-plus"  ##"llama3.2"

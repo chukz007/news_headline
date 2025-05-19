@@ -93,10 +93,11 @@ if __name__ == "__main__":
         if "/" in model_id:
             translated = translate_with_hf(input_path, model_id, hf_token, sample_size)
         else:
-            translated = translate_with_ollama(input_path, model_id, sample_size)
+            translate_with_ollama(input_path, model_id, sample_size, write_path)
+            # translated = translate_with_ollama(input_path, model_id, sample_size)
 
-        print("Saving translated results...")
-        save_json(translated, write_path, f"{task}_result.json")
+        # print("Saving translated results...")
+        # save_json(translated, write_path, f"{task}_result.json")
     
     elif task == "translation evaluation":
 
