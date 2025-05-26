@@ -127,4 +127,3 @@ def translate_with_hf(input_path, model_id, hf_token, sample_size):
         })
 
     return translated
-

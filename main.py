@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import argparse
 from dotenv import load_dotenv, find_dotenv
@@ -26,6 +27,30 @@ def save_json(data, path, filename):
     with open(full_path, "w", encoding="utf8") as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
+
+def clean_leading_label(text):
+    """
+    Removes leading labels like 'Translation:', 'Überschrift:', 'العنوان:', etc.,
+    even if preceded or followed by colons, and strips the result.
+    """
+    if not isinstance(text, str):
+        return text
+
+    # Define prefix patterns (case-insensitive), followed optionally by a colon and whitespace
+    prefix_pattern = r"""
+        ^\s*                         # optional leading space
+        (traduction|traducción|tradução|traduzione|
+         übersetzung|überschrift|título|headline|
+         translation|перевод заголовка|
+         العنوان الرئيسي|العنوان|翻译|शीर्षक)
+        \s*[:：]?\s*                 # optional colon (English or CJK), then space
+    """
+
+    # Strip prefix if found
+    cleaned = re.sub(prefix_pattern, "", text, flags=re.IGNORECASE | re.VERBOSE)
+
+    # Also clean any trailing colons left accidentally
+    return cleaned.strip(" :：").strip()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -109,7 +134,7 @@ if __name__ == "__main__":
 
         target_languages = [
             "French", "Spanish", "Portuguese", "Italian",
-            "German", "Russian", "Chinese", "Hindi", "Arabic"
+            "German", "Russian", "Chinese", "Hindi", "Arabic", "Igbo"
         ]
 
         results = {}
@@ -122,15 +147,19 @@ if __name__ == "__main__":
                 print(f"Skipping {lang} ({lang_code}): missing translations.")
                 continue
 
+
             comet_input = [
-                {"src": item["prediction_en"], "mt": item[prediction_key]}
+                {
+                 "src": item["prediction_en"], 
+                 "mt": clean_leading_label(item[prediction_key])
+                 }
                 for item in data if prediction_key in item
             ]
 
             print(f"\nEvaluating {lang} with COMET (referenceless)...")
             comet_scores, avg_score = evaluate_with_comet_referenceless(
                 data=comet_input,
-                model_name="Unbabel/wmt22-cometkiwi-da",
+                model_name="Unbabel/wmt22-cometkiwi-da" if lang_code != "ig" else "masakhane/africomet-qe-stl-1.1",
                 batch_size=8,
                 gpus=1
             )

@@ -4,9 +4,9 @@
 ##source /Users/chinonsoosuji/opt/anaconda3/etc/profile.d/conda.sh
 ##source /c/Users/CYNTHIA/anaconda3/etc/profile.d/conda.sh
 source /home/chinonso/anaconda3/etc/profile.d/conda.sh
-conda activate lang2
+conda activate somto
 
-task="translation"
+task="translation evaluation"
 model_path="command-r-plus"  ##"llama3.2"
 model_name="llama"
 dataset="archive/personalization/pers_preprocessed.csv"
