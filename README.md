@@ -34,4 +34,4 @@ Download the [Ollama](https://ollama.com/) model and setup the model like this  
 `ollama run <llama3.2>`
 
 Run the Code
-`run.sh`
+`./run.sh` for mac/linux `run.sh` for windows
