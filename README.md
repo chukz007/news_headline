@@ -33,5 +33,5 @@ Create `python=3.10.6` environment for `unbabel-comet` package to work
 Download the [Ollama](https://ollama.com/) model and setup the model like this  in your command terminal.
 `ollama run <llama3.2>`
 
-Run the Code
+Run the code
 `./run.sh` for mac/linux `run.sh` for windows
