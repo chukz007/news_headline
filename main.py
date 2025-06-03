@@ -8,7 +8,11 @@ from utilities.hf_model import Model, Inferencer
 from utilities.load_dataset import HeadlineDataLoader
 from utilities.prompts import prompt_template, system_prompt
 from utilities.translate import translate_with_hf, translate_with_ollama
-from utilities.eval import evaluate_headline_performance, evaluate_with_comet, evaluate_semantic_metrics, evaluate_with_comet_referenceless
+from utilities.eval import (evaluate_headline_performance, 
+                            evaluate_with_comet, 
+                            load_comet_model_once,
+                            evaluate_semantic_metrics, 
+                            evaluate_with_comet_referenceless)
 
 _ = load_dotenv(find_dotenv())  # Read local .env file
 hf_token = os.getenv("HF_TOKEN")
@@ -70,6 +74,7 @@ if __name__ == "__main__":
     # Ensure write directory exists
     os.makedirs(write_path, exist_ok=True)
 
+    ## If you wish to run main.py onstead of ./run.sh then use this
     # task="generation"
     # model_path="llama3.2"
     # model_name="llama"
@@ -81,7 +86,7 @@ if __name__ == "__main__":
         loader = HeadlineDataLoader(data_path, prompt_template)
         prompts, news_body, ground_truth = loader.get_prompts()
 
-        n = 5  # You can change this to len(prompts) for full processing
+        n = len(prompts)   # You can change this to len(prompts) for full processing
         output, comet_output = [], []
 
         if "/" in model_id:
@@ -102,6 +107,8 @@ if __name__ == "__main__":
 
             for i in range(n):
                 result = model.invoke({'input': prompts[i]}).content.strip()
+                if "</think>" in result:
+                    result = result.split('</think>')[-1].strip()
                 output.append({
                     "news_body": news_body[i],
                     "prediction": result,
@@ -117,12 +124,11 @@ if __name__ == "__main__":
         sample_size = 1000  # You can change this to len(prompts) for full processing
         if "/" in model_id:
             translated = translate_with_hf(input_path, model_id, hf_token, sample_size)
+            print("Saving translated results...")
+            save_json(translated, write_path, f"{task}_result.json")
         else:
             translate_with_ollama(input_path, model_id, sample_size, write_path)
-            # translated = translate_with_ollama(input_path, model_id, sample_size)
 
-        # print("Saving translated results...")
-        # save_json(translated, write_path, f"{task}_result.json")
     
     elif task == "translation evaluation":
 
@@ -157,9 +163,12 @@ if __name__ == "__main__":
             ]
 
             print(f"\nEvaluating {lang} with COMET (referenceless)...")
+            model_name="Unbabel/wmt22-cometkiwi-da" if lang_code != "ig" else "masakhane/africomet-qe-stl-1.1"
+            comet_model = load_comet_model_once(model_name)
+            
             comet_scores, avg_score = evaluate_with_comet_referenceless(
                 data=comet_input,
-                model_name="Unbabel/wmt22-cometkiwi-da" if lang_code != "ig" else "masakhane/africomet-qe-stl-1.1",
+                comet_model=comet_model,
                 batch_size=8,
                 gpus=1
             )
@@ -177,7 +186,8 @@ if __name__ == "__main__":
         )
 
         # print("Running COMET evaluation...")
-        comet_scores, avg_comet = evaluate_with_comet(json_path=os.path.join(write_path, "result.json"), gpus=1)
+        comet_model = load_comet_model_once("Unbabel/wmt22-comet-da")
+        comet_scores, avg_comet = evaluate_with_comet(json_path=os.path.join(write_path, "result.json"), comet_model=comet_model, batch_size=8, gpus=1)
 
         # Now compute BLEURT + BERTScore only
         print("Evaluating semantic similarity (BERTScore, BLEURT)...")
@@ -196,10 +206,3 @@ if __name__ == "__main__":
 
         save_json(metric_result, write_path, "metric_result.json")
         print(f"\nAll metrics saved to {os.path.join(write_path, 'metric_result.json')}")
-        
-
-        # Save separately
-        #save_json(semantic_metrics, write_path, "semantic_metrics.json")
-        #print(f"\nBLEURT + BERTScore metrics saved to {os.path.join(write_path, 'semantic_metrics.json')}")
-        # comet-score -s src.txt -t hyp1.txt --model Unbabel/wmt22-cometkiwi-da
-

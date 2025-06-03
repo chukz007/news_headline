@@ -1,3 +1,4 @@
+import json
 import nltk
 #nltk.download('all')
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
@@ -5,12 +6,19 @@ smoother = SmoothingFunction()
 from nltk.tokenize import word_tokenize
 from rouge_score import rouge_scorer
 import sacrebleu
-import json
 from comet import download_model, load_from_checkpoint
 import torch
 from bleurt_pytorch import BleurtConfig, BleurtForSequenceClassification, BleurtTokenizer
 from bert_score import score as bertscore
-import json
+
+
+def load_comet_model_once(model_name="Unbabel/wmt22-comet-da"):
+    """
+    Loads and returns a COMET model (reference-based or referenceless) only once.
+    """
+    model_path = download_model(model_name)
+    model = load_from_checkpoint(model_path)
+    return model
 
 
 def evaluate_headline_performance(json_path):
@@ -74,40 +82,6 @@ def evaluate_headline_performance(json_path):
     return avg_bleu, avg_meteor, avg_rouge_f1
 
 
-def evaluate_with_comet(json_path, model_name="Unbabel/wmt22-comet-da", batch_size=8, gpus=1):
-    """
-    Evaluates a JSON file using the specified COMET model.
-
-    Args:
-        json_path (str): Path to the JSON file containing evaluation data.
-                         Must include keys: 'news_body', 'prediction', 'ground_truth'
-        model_name (str): COMET model to use from Hugging Face Hub.
-        batch_size (int): Batch size for prediction.
-        gpus (int): Number of GPUs to use (set to 0 for CPU).
-
-    Returns:
-        List of COMET scores (one per example).
-    """
-    # Download and load the COMET model
-    model_path = download_model(model_name)
-    model = load_from_checkpoint(model_path)
-
-    # Load and transform the result data
-    with open(json_path, 'r', encoding='utf8') as f:
-        raw_data = json.load(f)
-
-    comet_ready_data = [
-        {"src": item["news_body"], "mt": item["prediction"], "ref": item["ground_truth"]}
-        for item in raw_data
-    ]
-
-    # Predict COMET scores
-    model_output = model.predict(comet_ready_data, batch_size=batch_size, gpus=gpus)
-
-    return model_output[0], model_output[1] # return only scores
-
-
-
 def evaluate_semantic_metrics(json_path):
     """
     Evaluate BERTScore and BLEURT (via bleurt-pytorch) from a JSON file,
@@ -142,23 +116,43 @@ def evaluate_semantic_metrics(json_path):
     return avg_bertscore, avg_bleurt
 
 
-def evaluate_with_comet_referenceless(data, model_name="Unbabel/wmt22-cometkiwi-da", batch_size=8, gpus=1):
+def evaluate_with_comet(json_path, comet_model, batch_size=8, gpus=1):
     """
-    Evaluates a list of translation pairs (src, mt) using referenceless COMET.
+    Evaluates a JSON file using a preloaded COMET model (reference-based).
+
+    Args:
+        json_path (str): Path to JSON file with 'news_body', 'prediction', and 'ground_truth'.
+        comet_model: Preloaded COMET model instance.
+        batch_size (int): Batch size for prediction.
+        gpus (int): Use GPU if > 0.
+
+    Returns:
+        Tuple[list, float]: list of scores, average score
+    """
+    with open(json_path, 'r', encoding='utf8') as f:
+        raw_data = json.load(f)
+
+    comet_ready_data = [
+        {"src": item["news_body"], "mt": item["prediction"], "ref": item["ground_truth"]}
+        for item in raw_data
+    ]
+
+    scores = comet_model.predict(comet_ready_data, batch_size=batch_size, gpus=gpus)
+    return scores[0], scores[1]
+
+
+def evaluate_with_comet_referenceless(data, comet_model, batch_size=8, gpus=1):
+    """
+    Evaluates a list of translation pairs (src, mt) using a preloaded referenceless COMET model.
 
     Args:
         data (list): List of dicts with keys 'src' and 'mt'
-        model_name (str): COMET referenceless model name
+        comet_model: Preloaded referenceless COMET model
         batch_size (int): Batch size for inference
-        gpus (int): Use GPU if > 0, else CPU
+        gpus (int): Use GPU if > 0
 
     Returns:
         Tuple[float, List[float]]: (average_score, list_of_scores)
     """
-    from comet import download_model, load_from_checkpoint
-
-    model_path = download_model(model_name)
-    model = load_from_checkpoint(model_path)
-
-    model_output = model.predict(data, batch_size=batch_size, gpus=gpus)
-    return model_output[0], model_output[1]
+    scores = comet_model.predict(data, batch_size=batch_size, gpus=gpus)
+    return scores[0], scores[1]

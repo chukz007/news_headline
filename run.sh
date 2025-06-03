@@ -6,9 +6,9 @@
 source /home/chinonso/anaconda3/etc/profile.d/conda.sh
 conda activate somto
 
-task="translation evaluation"
+task="Evaluation"
 model_path="command-r-plus"  ##"llama3.2"
-model_name="llama"
+model_name="dpsk"
 dataset="archive/personalization/pers_preprocessed.csv"
 write_path="results/${model_name}"
 
