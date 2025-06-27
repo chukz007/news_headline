@@ -11,6 +11,11 @@ import torch
 from bleurt_pytorch import BleurtConfig, BleurtForSequenceClassification, BleurtTokenizer
 from bert_score import score as bertscore
 
+import json
+from typing import Tuple, List
+from nltk.translate import meteor_score
+
+
 
 def load_comet_model_once(model_name="Unbabel/wmt22-comet-da"):
     """
@@ -21,60 +26,116 @@ def load_comet_model_once(model_name="Unbabel/wmt22-comet-da"):
     return model
 
 
-def evaluate_headline_performance(json_path):
+# def evaluate_headline_performance(json_path):
+#     """
+#     Evaluate BLEU, METEOR, and ROUGE scores from a JSON file containing
+#     predictions and references.
+
+#     Args:
+#         json_path (str): Path to the JSON file with keys:
+#                          'news_body', 'prediction', 'ground_truth'
+
+#     Returns:
+#         List of metric scores per item and overall averages.
+#     """
+#     with open(json_path, 'r', encoding='utf8') as f:
+#         data = json.load(f)
+
+#     bleu_scores = []
+#     meteor_scores = []
+#     rouge_f1_scores = []
+
+#     scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
+
+#     for item in data:
+#         ground_truth = item['ground_truth']
+#         prediction = item['prediction']
+
+#         # Tokenization
+#         gt_tokens = word_tokenize(ground_truth)
+#         pred_tokens = word_tokenize(prediction)
+
+#         # METEOR
+#         meteor = nltk.translate.meteor_score.single_meteor_score(gt_tokens, pred_tokens)
+
+#         # ROUGE
+#         rouge = scorer.score(ground_truth, prediction)
+#         rouge_f = sum([
+#             rouge['rouge1'].fmeasure,
+#             rouge['rouge2'].fmeasure,
+#             rouge['rougeL'].fmeasure
+#         ]) / 3
+
+#         # BLEU (scaled to 0–1)
+#         #bleu = sacrebleu.raw_corpus_bleu([prediction], [[ground_truth]], .01).score / 100
+
+#         # BLEU (safely, with smoothing)
+#         bleu = sentence_bleu([gt_tokens], pred_tokens, smoothing_function=smoother.method1)
+#         bleu_scores.append(bleu)  # scale to 0–1 for consistency
+
+
+#         # Collect scores
+#         bleu_scores.append(bleu)
+#         meteor_scores.append(meteor)
+#         rouge_f1_scores.append(rouge_f)
+
+#     # Compute averages
+#     avg_bleu = sum(bleu_scores) / len(bleu_scores)
+#     avg_meteor = sum(meteor_scores) / len(meteor_scores)
+#     avg_rouge_f1 = sum(rouge_f1_scores) / len(rouge_f1_scores)
+
+#     return avg_bleu, avg_meteor, avg_rouge_f1
+
+def evaluate_headline_performance(json_path: str) -> Tuple[float, float, float]:
     """
-    Evaluate BLEU, METEOR, and ROUGE scores from a JSON file containing
-    predictions and references.
+    Compute average SacréBLEU, METEOR, and ROUGE-F1 scores for a JSON-Lines file.
 
-    Args:
-        json_path (str): Path to the JSON file with keys:
-                         'news_body', 'prediction', 'ground_truth'
+    Each line / element must contain:
+        - "prediction"   : system headline (string)
+        - "ground_truth" : reference headline (string)
 
-    Returns:
-        List of metric scores per item and overall averages.
+    Returns
+    -------
+    (avg_bleu, avg_meteor, avg_rouge_f1)   # each already on the 0-1 scale
     """
-    with open(json_path, 'r', encoding='utf8') as f:
-        data = json.load(f)
+    with open(json_path, encoding="utf-8") as fh:
+        data = json.load(fh)
 
-    bleu_scores = []
-    meteor_scores = []
-    rouge_f1_scores = []
+    bleu_scores: List[float] = []
+    meteor_scores: List[float] = []
+    rouge_f1_scores: List[float] = []
 
-    scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
+    rouge = rouge_scorer.RougeScorer(["rouge1", "rouge2", "rougeL"], use_stemmer=True)
 
     for item in data:
-        ground_truth = item['ground_truth']
-        prediction = item['prediction']
+        reference = item["ground_truth"]
+        hypothesis = item["prediction"]
 
-        # Tokenization
-        gt_tokens = word_tokenize(ground_truth)
-        pred_tokens = word_tokenize(prediction)
-
-        # METEOR
-        meteor = nltk.translate.meteor_score.single_meteor_score(gt_tokens, pred_tokens)
-
-        # ROUGE
-        rouge = scorer.score(ground_truth, prediction)
-        rouge_f = sum([
-            rouge['rouge1'].fmeasure,
-            rouge['rouge2'].fmeasure,
-            rouge['rougeL'].fmeasure
-        ]) / 3
-
-        # BLEU (scaled to 0–1)
-        #bleu = sacrebleu.raw_corpus_bleu([prediction], [[ground_truth]], .01).score / 100
-
-        # BLEU (safely, with smoothing)
-        bleu = sentence_bleu([gt_tokens], pred_tokens, smoothing_function=smoother.method1)
-        bleu_scores.append(bleu)  # scale to 0–1 for consistency
-
-
-        # Collect scores
-        bleu_scores.append(bleu)
+        # ----- METEOR -------------------------------------------------------
+        meteor = meteor_score.single_meteor_score(
+            word_tokenize(reference), word_tokenize(hypothesis)
+        )
         meteor_scores.append(meteor)
-        rouge_f1_scores.append(rouge_f)
 
-    # Compute averages
+        # ----- ROUGE (average of R-1/R-2/R-L F1) ---------------------------
+        r = rouge.score(reference, hypothesis)
+        rouge_f1 = (r["rouge1"].fmeasure + r["rouge2"].fmeasure + r["rougeL"].fmeasure) / 3
+        rouge_f1_scores.append(rouge_f1)
+
+        # ----- SacréBLEU sentence-level (0-1 scale) ------------------------
+        bleu = (
+            sacrebleu.sentence_bleu(
+                hypothesis,
+                [reference],           # list of reference variants
+                smooth_method="exp",   # classic smoothing
+                tokenize="intl",       # default WMT/WebNLG tokeniser
+                lowercase=False,
+            ).score
+            / 100.0
+        )
+        bleu_scores.append(bleu)
+
+    # -------- overall averages ---------------------------------------------
     avg_bleu = sum(bleu_scores) / len(bleu_scores)
     avg_meteor = sum(meteor_scores) / len(meteor_scores)
     avg_rouge_f1 = sum(rouge_f1_scores) / len(rouge_f1_scores)
