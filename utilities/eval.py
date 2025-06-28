@@ -11,9 +11,40 @@ import torch
 from bleurt_pytorch import BleurtConfig, BleurtForSequenceClassification, BleurtTokenizer
 from bert_score import score as bertscore
 
-import json
-from typing import Tuple, List
+from pathlib import Path
+from typing import Iterable, Dict, Tuple, List
 from nltk.translate import meteor_score
+
+def _read_records(path):
+    """
+    Yield dicts from either a JSON array or JSON-Lines file.
+    Silently skip lines that can’t be parsed.
+    """
+    from pathlib import Path, PurePath
+    import json, itertools
+
+    path = Path(path)
+    with path.open(encoding="utf-8") as fh:
+        first = fh.readline().lstrip()
+        fh.seek(0)
+
+        # whole file is an array  [...]
+        if first.startswith("["):
+            try:
+                yield from json.load(fh)
+            except json.JSONDecodeError as exc:
+                raise RuntimeError(f"{path} is not valid JSON: {exc}") from None
+            return
+
+        # JSONL or mixed file
+        for lineno, line in enumerate(fh, 1):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                yield json.loads(line)
+            except json.JSONDecodeError as exc:
+                print(f"⚠️  skipped line {lineno}: {exc}")
 
 
 
@@ -98,49 +129,49 @@ def evaluate_headline_performance(json_path: str) -> Tuple[float, float, float]:
     -------
     (avg_bleu, avg_meteor, avg_rouge_f1)   # each already on the 0-1 scale
     """
-    with open(json_path, encoding="utf-8") as fh:
-        data = json.load(fh)
+    records = list(_read_records(json_path))      # ← NEW ①
+    if not records:                               # ← NEW ②
+        raise RuntimeError("No valid JSON objects found in file.")
 
-    bleu_scores: List[float] = []
-    meteor_scores: List[float] = []
-    rouge_f1_scores: List[float] = []
+    # ---------- metric accumulators -------------------------------------------
+    bleu_scores, meteor_scores, rouge_f1_scores = [], [], []
+    rouge = rouge_scorer.RougeScorer(
+        ["rouge1", "rouge2", "rougeL"], use_stemmer=True
+    )
 
-    rouge = rouge_scorer.RougeScorer(["rouge1", "rouge2", "rougeL"], use_stemmer=True)
-
-    for item in data:
-        reference = item["ground_truth"]
+    # ---------- main loop ------------------------------------------------------
+    for item in records:                          # use parsed list
+        reference  = item["ground_truth"]
         hypothesis = item["prediction"]
 
-        # ----- METEOR -------------------------------------------------------
+        # -------- METEOR --------
         meteor = meteor_score.single_meteor_score(
             word_tokenize(reference), word_tokenize(hypothesis)
         )
         meteor_scores.append(meteor)
 
-        # ----- ROUGE (average of R-1/R-2/R-L F1) ---------------------------
-        r = rouge.score(reference, hypothesis)
-        rouge_f1 = (r["rouge1"].fmeasure + r["rouge2"].fmeasure + r["rougeL"].fmeasure) / 3
+        # -------- ROUGE-F1 (avg of 1/2/L) --------
+        rs = rouge.score(reference, hypothesis)
+        rouge_f1 = (rs["rouge1"].fmeasure + rs["rouge2"].fmeasure + rs["rougeL"].fmeasure) / 3
         rouge_f1_scores.append(rouge_f1)
 
-        # ----- SacréBLEU sentence-level (0-1 scale) ------------------------
+        # -------- SacréBLEU sentence --------
         bleu = (
             sacrebleu.sentence_bleu(
                 hypothesis,
-                [reference],           # list of reference variants
-                smooth_method="exp",   # classic smoothing
-                tokenize="intl",       # default WMT/WebNLG tokeniser
+                [reference],
+                smooth_method="exp",
+                tokenize="intl",
                 lowercase=False,
             ).score
             / 100.0
         )
         bleu_scores.append(bleu)
 
-    # -------- overall averages ---------------------------------------------
-    avg_bleu = sum(bleu_scores) / len(bleu_scores)
+    avg_bleu   = sum(bleu_scores) / len(bleu_scores)
     avg_meteor = sum(meteor_scores) / len(meteor_scores)
-    avg_rouge_f1 = sum(rouge_f1_scores) / len(rouge_f1_scores)
-
-    return avg_bleu, avg_meteor, avg_rouge_f1
+    avg_rouge  = sum(rouge_f1_scores) / len(rouge_f1_scores)
+    return avg_bleu, avg_meteor, avg_rouge
 
 
 def evaluate_semantic_metrics(json_path):
